@@ -1,0 +1,83 @@
+{\rtf1\ansi\deff0
+{\fonttbl{\f0\fswiss Arial;}{\f1\froman Times New Roman;}}
+{\colortbl;\red0\green0\blue0;}
+\paperw11907\paperh16840\margl1417\margr1417\margt1417\margb1417
+\pard\qc\b\fs40 ShopVault Multivendor E-Commerce System\par
+\par
+\pard\qj\f1\fs24 A structured research paper describing the architecture, functionality, and design of the ShopVault multivendor e-commerce platform.\par
+\par
+\pard\b\fs32 Abstract\par
+\pard\qj\b0\fs24 ShopVault is a full-stack multi-vendor e-commerce platform designed to enable vendors, customers, and administrators to interact within a shared online marketplace. The system combines a Node.js/Express backend with a React frontend and MySQL database to provide secure authentication, product management, order processing, payment integration, and administrative controls.\par
+\par
+\pard\b\fs32 Introduction\par
+\pard\qj\b0\fs24 This research paper analyzes the design and implementation of ShopVault, highlighting its architecture, technologies, functional modules, and user roles. The project supports multi-vendor operations, user authentication, product catalog management, and payment processing through Razorpay.\par
+\par
+\pard\b\fs32 Problem Statement\par
+\pard\qj\b0\fs24 Modern online marketplaces require a platform that can handle multiple sellers while maintaining data separation, secure user accounts, diverse product catalogs, order workflows, and payment reconciliation. ShopVault addresses these needs by offering a modular system that supports admin, vendor, and customer roles with the necessary business logic for marketplace transactions.\par
+\par
+\pard\b\fs32 System Architecture\par
+\pard\qj\b0\fs24 The application employs a separated frontend-backend architecture. The backend is built with Node.js, Express, and Sequelize on MySQL. The frontend is a React application with context-based state management, client-side routing, and responsive user interface components.\par
+\par
+\pard\b\fs28 Backend Design\par
+\pard\qj\b0\fs24 The backend exposes a RESTful API with route groups for authentication, products, orders, payment, reviews, administration, wishlist, coupons, and vendors. Express middleware handles CORS, JSON parsing, static asset serving, request logging, authentication, role-based access control, and error handling.\par
+\pard\fs24 Key backend components include:\par
+\pard\li720\bullet Authentication and authorization using JWT and bcrypt for secure login, registration, and role management.\par
+\pard\li720\bullet Database models managed via Sequelize, supporting Users, Products, Orders, OrderItems, Reviews, Coupons, and vendor-specific relationships.\par
+\pard\li720\bullet Payment integration with Razorpay for order creation and verification.\par
+\pard\li720\bullet Administrative endpoints for dashboard analytics, user and vendor management, and product moderation.\par
+\pard\li720\bullet Health check and fallback route handling for system reliability.\par
+\par
+\pard\b\fs28 Frontend Design\par
+\pard\qj\b0\fs24 The frontend is a single-page application built with React and React Router. It uses context providers to share authentication, cart, wishlist, notifications, and recently viewed product state across the application.\par
+\pard\fs24 Important frontend features include:\par
+\pard\li720\bullet Dynamic routing for public pages, customer pages, vendor dashboards, and admin dashboards.\par
+\pard\li720\bullet Protected routes enforcing role-based access for customers, vendors, and administrators.\par
+\pard\li720\bullet Reusable UI components such as Navbar, Footer, ProductCard, and ProtectedRoute.\par
+\pard\li720\bullet Integration with backend API endpoints through Axios services.\par
+\pard\li720\bullet Toast notifications for user feedback and status updates.\par
+\par
+\pard\b\fs32 User Roles and Use Cases\par
+\pard\fs24\li0 Admin:\tab Full control over platform management, including user approval, vendor validation, product moderation, order oversight, and analytics.\par
+\pard\fs24\li0 Vendor:\tab Create and manage products, view and update orders for the vendor’s products, and monitor earnings and inventory status.\par
+\pard\fs24\li0 Customer:\tab Browse products, add items to cart, checkout using Razorpay, manage wishlist, track orders, and submit reviews.\par
+\par
+\pard\b\fs32 Key Functional Modules\par
+\pard\b\fs28 Authentication\par
+\pard\qj\b0\fs24 Registration, login, profile management, password recovery, email verification, and JWT-based session management.\par
+\par
+\pard\b\fs28 Product Management\par
+\pard\qj\b0\fs24 Category-based product browsing, vendor storefronts, product detail pages, and vendor-admin product CRUD operations.\par
+\par
+\pard\b\fs28 Order Processing\par
+\pard\qj\b0\fs24 Customer checkout flows, order creation, order history, vendor order views, and status updates.\par
+\par
+\pard\b\fs28 Payment Handling\par
+\pard\qj\b0\fs24 Razorpay order creation, payment verification, and secure transaction processing.\par
+\par
+\pard\b\fs28 Reviews and Ratings\par
+\pard\qj\b0\fs24 Product reviews by customers with moderation and retrieval of review history.\par
+\par
+\pard\b\fs28 Wishlist and Recently Viewed\par
+\pard\qj\b0\fs24 Customer wishlist persistence and tracking of recently viewed products for improved engagement.\par
+\par
+\pard\b\fs28 Coupons\par
+\pard\qj\b0\fs24 Coupon creation, validation, and redemption support for promotional discounts.\par
+\par
+\pard\b\fs32 Technology Stack\par
+\pard\qj\b0\fs24 Frontend: React.js, React Router, Axios, React Toastify, Context API, and React Scripts. Backend: Node.js, Express.js, Sequelize ORM, MySQL, JWT, bcrypt, Razorpay SDK, and Nodemailer. Infrastructure: CORS middleware, dotenv configuration, and REST API design.\par
+\par
+\pard\b\fs32 Implementation Details\par
+\pard\qj\b0\fs24 The backend initializes with model synchronization and default admin seeding. This ensures required schema changes are applied and platform administration is available on first startup. The frontend organizes pages and components to provide a responsive, routed interface, with role-based access enforced using a ProtectedRoute wrapper.\par
+\par
+\pard\b\fs32 Challenges and Solutions\par
+\pard\qj\b0\fs24 Multi-vendor marketplaces require strong access control and data isolation between vendors. ShopVault solves this using role-check middleware and vendor-specific endpoints for product and order management. Payment integration and verification are handled through Razorpay to support secure checkout, while the backend maintains transactional order state.\par
+\par
+\pard\b\fs32 Testing and Validation\par
+\pard\qj\b0\fs24 Validation is performed at the API level using route middleware and request payload integrity checks. The frontend also provides user feedback through toast notifications, and protected routes prevent unauthorized access to restricted pages.\par
+\par
+\pard\b\fs32 Future Work\par
+\pard\qj\b0\fs24 Potential enhancements include full internationalization support, search and filtering improvements, advanced vendor analytics, automated email notifications for order status changes, and deployment automation using containerization.\par
+\par
+\pard\b\fs32 Conclusion\par
+\pard\qj\b0\fs24 ShopVault demonstrates a complete multi-vendor marketplace solution built with modern web technologies. Its modular architecture supports future expansion and provides a robust foundation for ecommerce operations with distinct roles for admins, vendors, and customers.\par
+}

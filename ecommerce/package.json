@@ -1,0 +1,12 @@
+{
+  "name": "shopvault-multivendor",
+  "version": "1.0.0",
+  "description": "Multi-Vendor E-Commerce System - React + Node.js + MySQL",
+  "scripts": {
+    "install:all": "cd ecommerce/backend && npm install && cd ../frontend && npm install",
+    "dev:backend": "cd ecommerce/backend && npm run dev",
+    "dev:frontend": "cd ecommerce/frontend && npm start",
+    "start:backend": "cd ecommerce/backend && npm start"
+  },
+  "private": true
+}

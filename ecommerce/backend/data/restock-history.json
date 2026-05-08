@@ -1,0 +1,72 @@
+[
+  {
+    "id": "restock_mo3y1b4k_eil1bb",
+    "vendor_id": 21,
+    "product_id": 12,
+    "product_name": "Portable 6-Blade Juicer Blender with Built-In Jar, Juice Mixer Bottle, Fruit Juice Machine",
+    "previous_stock": 6,
+    "next_stock": 5,
+    "delta": -1,
+    "change_type": "sale",
+    "source": "order",
+    "previous_variants": [],
+    "next_variants": [],
+    "createdAt": "2026-04-18T06:15:52.724Z"
+  },
+  {
+    "id": "restock_mo38mmui_v8uczt",
+    "vendor_id": 17,
+    "product_id": 11,
+    "product_name": "Stylish Multi-Purpose Portable Laptop Table, Foldable Wooden Desk for Bed Tray, Laptop Table, Study Table with Mug Holder, Ergonomic, Non-Slip Legs in Bed Table (COTTED, BHIM Krishna)",
+    "previous_stock": 0,
+    "next_stock": -4,
+    "delta": -4,
+    "change_type": "sale",
+    "source": "order",
+    "previous_variants": [],
+    "next_variants": [],
+    "createdAt": "2026-04-17T18:24:37.674Z"
+  },
+  {
+    "id": "restock_mny91ll7_wyryjm",
+    "vendor_id": 21,
+    "product_id": 12,
+    "product_name": "Portable 6-Blade Juicer Blender with Built-In Jar, Juice Mixer Bottle, Fruit Juice Machine",
+    "previous_stock": 0,
+    "next_stock": 7,
+    "delta": 7,
+    "change_type": "initial_stock",
+    "source": "create",
+    "previous_variants": [],
+    "next_variants": [],
+    "createdAt": "2026-04-14T06:37:25.003Z"
+  },
+  {
+    "id": "restock_mnpzubej_wtghxu",
+    "vendor_id": 17,
+    "product_id": 11,
+    "product_name": "Stylish Multi-Purpose Portable Laptop Table, Foldable Wooden Desk for Bed Tray, Laptop Table, Study Table with Mug Holder, Ergonomic, Non-Slip Legs in Bed Table (COTTED, BHIM Krishna)",
+    "previous_stock": 4,
+    "next_stock": 2,
+    "delta": -2,
+    "change_type": "sale",
+    "source": "order",
+    "previous_variants": [],
+    "next_variants": [],
+    "createdAt": "2026-04-08T11:57:39.259Z"
+  },
+  {
+    "id": "restock_mnpy21l7_jfvk4w",
+    "vendor_id": 17,
+    "product_id": 11,
+    "product_name": "Stylish Multi-Purpose Portable Laptop Table, Foldable Wooden Desk for Bed Tray, Laptop Table, Study Table with Mug Holder, Ergonomic, Non-Slip Legs in Bed Table (COTTED, BHIM Krishna)",
+    "previous_stock": 0,
+    "next_stock": 6,
+    "delta": 6,
+    "change_type": "initial_stock",
+    "source": "create",
+    "previous_variants": [],
+    "next_variants": [],
+    "createdAt": "2026-04-08T11:07:40.555Z"
+  }
+]
