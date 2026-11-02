@@ -7,8 +7,14 @@ const RecentlyViewedContext = createContext(null);
 
 export const RecentlyViewedProvider = ({ children }) => {
   const [recentlyViewed, setRecentlyViewed] = useState(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    return stored ? JSON.parse(stored) : [];
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      const parsed = stored ? JSON.parse(stored) : [];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      localStorage.removeItem(STORAGE_KEY);
+      return [];
+    }
   });
 
   useEffect(() => {

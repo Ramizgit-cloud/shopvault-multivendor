@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useAuth } from '../context/AuthContext';
@@ -49,6 +49,7 @@ const VendorDashboard = () => {
   const [editProduct, setEditProduct] = useState(null);
   const [form, setForm] = useState(emptyProductForm);
   const [requestingPayout, setRequestingPayout] = useState(false);
+  const productFormRef = useRef(null);
 
   const isApprovedVendor = user?.role === 'vendor' ? Boolean(user.isApproved) : false;
   const isPendingVendor = user?.role === 'vendor' && !user?.isApproved;
@@ -107,6 +108,13 @@ const VendorDashboard = () => {
   useEffect(() => {
     if (tab === 'orders') fetchOrders();
   }, [tab]);
+
+  useEffect(() => {
+    if (!showForm) return;
+    window.requestAnimationFrame(() => {
+      productFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }, [showForm]);
 
   const openForm = (product = null) => {
     if (product) {
@@ -271,16 +279,8 @@ const VendorDashboard = () => {
             </button>
           </div>
 
-          <VendorCampaignManager
-            campaigns={campaigns}
-            products={products}
-            onCreate={handleCreateCampaign}
-            onUpdate={handleUpdateCampaign}
-            onToggleStatus={handleToggleCampaignStatus}
-          />
-
           {showForm && (
-            <form onSubmit={handleSave} className="product-form card">
+            <form ref={productFormRef} onSubmit={handleSave} className="product-form card">
               <h3>{editProduct ? 'Edit Product' : 'New Product'}</h3>
               <div className="form-grid">
                 <div className="form-group">
@@ -318,6 +318,14 @@ const VendorDashboard = () => {
               </div>
             </form>
           )}
+
+          <VendorCampaignManager
+            campaigns={campaigns}
+            products={products}
+            onCreate={handleCreateCampaign}
+            onUpdate={handleUpdateCampaign}
+            onToggleStatus={handleToggleCampaignStatus}
+          />
 
           {earnings && (
             <div className="inventory-health-grid">

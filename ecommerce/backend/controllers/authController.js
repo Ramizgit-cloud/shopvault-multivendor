@@ -4,6 +4,11 @@ const { generateToken } = require('../utils/jwt');
 const { hashToken } = require('../utils/securityTokens');
 const { createVerificationForUser, createPasswordResetForUser } = require('../utils/authEmailFlows');
 const { normalizeEmail, isValidEmail } = require('../utils/emailValidation');
+const { validatePassword } = require('../utils/passwordPolicy');
+
+const shouldRequireVerifiedEmail = () => (
+  process.env.NODE_ENV === 'production' || process.env.REQUIRE_EMAIL_VERIFICATION === 'true'
+);
 
 const ensureSecurityRecord = async (user, defaults = {}) => {
   const [security] = await UserSecurity.findOrCreate({
@@ -40,6 +45,11 @@ const register = async (req, res, next) => {
 
     if (!isValidEmail(email)) {
       return res.status(400).json({ success: false, message: 'Enter a valid email address' });
+    }
+
+    const passwordPolicy = validatePassword(password);
+    if (!passwordPolicy.valid) {
+      return res.status(400).json({ success: false, message: passwordPolicy.message });
     }
 
     const existingUser = await User.findOne({ where: { email } });
@@ -103,13 +113,25 @@ const login = async (req, res, next) => {
       return res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
 
+    const security = await ensureSecurityRecord(user);
+    if (shouldRequireVerifiedEmail() && !security.emailVerified) {
+      return res.status(403).json({
+        success: false,
+        message: 'Verify your email before logging in.',
+      });
+    }
+
     const token = generateToken(user);
 
     res.json({
       success: true,
       message: 'Login successful',
       token,
-      user: await serializeUser(user),
+      user: {
+        ...user.toJSON(),
+        emailVerified: security.emailVerified,
+        phoneVerified: security.phoneVerified,
+      },
     });
   } catch (error) {
     next(error);
@@ -211,8 +233,9 @@ const resetPassword = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Reset token and new password are required' });
     }
 
-    if (password.length < 6) {
-      return res.status(400).json({ success: false, message: 'Password must be at least 6 characters' });
+    const passwordPolicy = validatePassword(password);
+    if (!passwordPolicy.valid) {
+      return res.status(400).json({ success: false, message: passwordPolicy.message });
     }
 
     const security = await UserSecurity.findOne({
@@ -266,6 +289,11 @@ const changePassword = async (req, res, next) => {
   try {
     const { currentPassword, newPassword } = req.body;
     const user = await User.findByPk(req.user.id);
+
+    const passwordPolicy = validatePassword(newPassword);
+    if (!passwordPolicy.valid) {
+      return res.status(400).json({ success: false, message: passwordPolicy.message });
+    }
 
     const isMatch = await user.comparePassword(currentPassword);
     if (!isMatch) {

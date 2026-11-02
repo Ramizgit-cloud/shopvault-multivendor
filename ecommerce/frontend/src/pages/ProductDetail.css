@@ -364,6 +364,27 @@
   background: #fff1f2;
 }
 
+.purchase-role-note {
+  padding: 14px 16px;
+  border-radius: var(--radius);
+  border: 1.5px solid #fdba74;
+  background: #fff7ed;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.purchase-role-note strong {
+  color: #9a3412;
+  font-size: 14px;
+}
+
+.purchase-role-note span {
+  color: #b45309;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
 /* Reviews */
 .reviews-section { margin-top: 60px; }
 

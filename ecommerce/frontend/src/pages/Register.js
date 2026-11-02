@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { authAPI } from '../services/api';
 import { toast } from 'react-toastify';
+import { validatePassword } from '../utils/passwordPolicy';
 import './Auth.css';
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -17,7 +18,8 @@ const Register = () => {
     e.preventDefault();
     const email = form.email.trim().toLowerCase();
     if (!emailRegex.test(email)) { toast.error('Enter a valid email address'); return; }
-    if (form.password.length < 6) { toast.error('Password must be at least 6 characters'); return; }
+    const passwordPolicy = validatePassword(form.password);
+    if (!passwordPolicy.valid) { toast.error(passwordPolicy.message); return; }
     setLoading(true);
     try {
       const res = await authAPI.register({ ...form, email });
@@ -54,7 +56,7 @@ const Register = () => {
           </div>
           <div className="form-group">
             <label className="form-label">Password</label>
-            <input className="form-input" type="password" name="password" value={form.password} onChange={handleChange} placeholder="Min. 6 characters" required />
+            <input className="form-input" type="password" name="password" value={form.password} onChange={handleChange} placeholder="Min. 10 chars, number, symbol" required />
           </div>
           <div className="form-group">
             <label className="form-label">I want to</label>

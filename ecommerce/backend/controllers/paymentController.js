@@ -14,6 +14,23 @@ const getRazorpayInstance = () => {
   });
 };
 
+const signaturesMatch = (expectedSignature, receivedSignature) => {
+  if (!expectedSignature || !receivedSignature) return false;
+
+  const expected = Buffer.from(expectedSignature, 'hex');
+  const received = Buffer.from(String(receivedSignature), 'hex');
+
+  return expected.length === received.length && crypto.timingSafeEqual(expected, received);
+};
+
+// GET /api/payment/config
+const getPaymentConfig = (_req, res) => {
+  res.json({
+    success: true,
+    razorpayConfigured: Boolean(getRazorpayInstance()),
+  });
+};
+
 // POST /api/payment/create-order
 const createRazorpayOrder = async (req, res, next) => {
   try {
@@ -66,12 +83,20 @@ const verifyPayment = async (req, res, next) => {
       .update(body)
       .digest('hex');
 
-    if (expectedSignature !== razorpay_signature) {
+    if (!signaturesMatch(expectedSignature, razorpay_signature)) {
       return res.status(400).json({ success: false, message: 'Invalid payment signature' });
     }
 
-    const order = await Order.findByPk(order_id);
+    const order = await Order.findOne({ where: { id: order_id, user_id: req.user.id } });
     if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
+
+    if (order.payment_status === 'paid') {
+      return res.status(400).json({ success: false, message: 'Order already paid' });
+    }
+
+    if (order.razorpay_order_id !== razorpay_order_id) {
+      return res.status(400).json({ success: false, message: 'Payment order mismatch' });
+    }
 
     const couponRedemption = await CouponRedemption.findOne({ where: { order_id: order.id } });
     if (couponRedemption && !couponRedemption.is_consumed) {
@@ -128,4 +153,4 @@ const completeDemoPayment = async (req, res, next) => {
   }
 };
 
-module.exports = { createRazorpayOrder, verifyPayment, completeDemoPayment };
+module.exports = { getPaymentConfig, createRazorpayOrder, verifyPayment, completeDemoPayment };

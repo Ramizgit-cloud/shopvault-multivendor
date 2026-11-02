@@ -1,4 +1,8 @@
 require('dotenv').config();
+const { validateEnvironment } = require('./config/validateEnvironment');
+
+validateEnvironment();
+
 const app = require('./app');
 const { connectDB } = require('./config/database');
 
@@ -48,69 +52,46 @@ const startServer = async () => {
   const {
     User,
     UserSecurity,
-    OrderTrackingEvent,
-    Product,
-    Coupon,
-    CouponRedemption,
-    VendorCampaign,
-    Order,
-    VendorReview,
-    VendorPayout,
-    VendorPayoutOrder,
   } = require('./models');
-  await User.sync({ alter: true });
-  await UserSecurity.sync({ alter: true });
-  await OrderTrackingEvent.sync({ alter: true });
-  await Product.sync({ alter: true });
-  await Order.sync({ alter: true });
-  await Coupon.sync({ alter: true });
-  await CouponRedemption.sync({ alter: true });
-  await VendorCampaign.sync({ alter: true });
-  await VendorReview.sync({ alter: true });
-  await VendorPayout.sync({ alter: true });
-  await VendorPayoutOrder.sync({ alter: true });
 
-  await ensureDemoUser(User, UserSecurity, {
-    name: 'Super Admin',
-    email: 'ramizahamed959@gmail.com',
-    password: 'Admin@123',
-    role: 'admin',
-  });
+  if (process.env.ENABLE_DEMO_DATA === 'true' && process.env.NODE_ENV !== 'production') {
+    await ensureDemoUser(User, UserSecurity, {
+      name: 'Super Admin',
+      email: 'ramizahamed959@gmail.com',
+      password: 'Admin@123',
+      role: 'admin',
+    });
 
-  await ensureDemoUser(User, UserSecurity, {
-    name: 'Legacy Admin',
-    email: 'admin@shop.com',
-    password: 'Admin@123',
-    role: 'admin',
-  });
+    await ensureDemoUser(User, UserSecurity, {
+      name: 'Legacy Admin',
+      email: 'admin@shop.com',
+      password: 'Admin@123',
+      role: 'admin',
+    });
 
-  await ensureDemoUser(User, UserSecurity, {
-    name: 'Demo Vendor',
-    email: 'vendor@shop.com',
-    password: 'Vendor@123',
-    role: 'vendor',
-  });
+    await ensureDemoUser(User, UserSecurity, {
+      name: 'Demo Vendor',
+      email: 'vendor@shop.com',
+      password: 'Vendor@123',
+      role: 'vendor',
+    });
 
-  await ensureDemoUser(User, UserSecurity, {
-    name: 'Second Vendor',
-    email: 'vendor2@shop.com',
-    password: 'Vendor@123',
-    role: 'vendor',
-  });
+    await ensureDemoUser(User, UserSecurity, {
+      name: 'Second Vendor',
+      email: 'vendor2@shop.com',
+      password: 'Vendor@123',
+      role: 'vendor',
+    });
 
-  await ensureDemoUser(User, UserSecurity, {
-    name: 'Demo Customer',
-    email: 'customer@shop.com',
-    password: 'Customer@123',
-    role: 'customer',
-  });
+    await ensureDemoUser(User, UserSecurity, {
+      name: 'Demo Customer',
+      email: 'customer@shop.com',
+      password: 'Customer@123',
+      role: 'customer',
+    });
 
-  console.log('Demo credentials ensured:');
-  console.log('Admin: ramizahamed959@gmail.com / Admin@123');
-  console.log('Legacy Admin: admin@shop.com / Admin@123');
-  console.log('Vendor: vendor@shop.com / Vendor@123');
-  console.log('Vendor 2: vendor2@shop.com / Vendor@123');
-  console.log('Customer: customer@shop.com / Customer@123');
+    console.log('Demo credentials ensured for local development.');
+  }
 
   const server = app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);

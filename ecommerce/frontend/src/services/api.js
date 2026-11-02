@@ -67,6 +67,7 @@ export const orderAPI = {
 };
 
 export const paymentAPI = {
+  getConfig: () => API.get('/payment/config'),
   createRazorpayOrder: (order_id) => API.post('/payment/create-order', { order_id }),
   verifyPayment: (data) => API.post('/payment/verify', data),
   completeDemoPayment: (order_id) => API.post('/payment/demo-complete', { order_id }),

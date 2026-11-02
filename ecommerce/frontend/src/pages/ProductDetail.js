@@ -130,27 +130,29 @@ const ProductDetail = () => {
   const handleAddToCart = () => {
     if (!user) {
       toast.info('Please log in');
-      return;
+      return false;
     }
     if (user.role !== 'customer') {
       toast.info('Only customers can shop');
-      return;
+      return false;
     }
     if (product.variants?.length > 0 && !selectedVariant) {
       toast.info('Choose a variant first');
-      return;
+      return false;
     }
     addToCart(product, qty, selectedVariant);
     toast.success(`${qty} x ${product.name}${selectedVariant ? ` (${selectedVariant.label})` : ''} added to cart!`);
+    return true;
   };
 
   const handleBuyNow = () => {
     if (!user) {
-      navigate('/login');
+      navigate('/login', { state: { from: `/products/${id}` } });
       return;
     }
-    handleAddToCart();
-    navigate('/cart');
+    if (handleAddToCart()) {
+      navigate('/cart', { state: { buyNow: true } });
+    }
   };
 
   const handleReviewSubmit = async (event) => {
@@ -279,39 +281,6 @@ const ProductDetail = () => {
             </div>
           </div>
 
-          <div className="delivery-estimate-card">
-            <div className="delivery-estimate-header">
-              <div>
-                <strong>{deliveryEstimate.label}</strong>
-                <span>{deliveryEstimate.detail}</span>
-              </div>
-              <div className="delivery-estimate-price">
-                <small>Shipping</small>
-                <strong>{deliveryEstimate.shipping.shippingFee === 0 ? 'Free' : `Rs ${deliveryEstimate.shipping.shippingFee}`}</strong>
-              </div>
-            </div>
-            <div className="delivery-pincode-row">
-              <input
-                className="form-input"
-                value={deliveryPincodeInput}
-                onChange={(event) => setDeliveryPincodeInput(event.target.value.replace(/\D/g, '').slice(0, 6))}
-                placeholder="Enter pincode"
-                inputMode="numeric"
-              />
-              <button type="button" className="btn btn-outline" onClick={handleDeliveryCheck}>
-                Check
-              </button>
-            </div>
-            <div className={`delivery-serviceability ${serviceabilityTone}`}>
-              <strong>{deliveryEstimate.serviceability.label}</strong>
-              <span>{deliveryEstimate.serviceability.detail}</span>
-            </div>
-            <div className="delivery-threshold-note">
-              <strong>{deliveryEstimate.shipping.label}</strong>
-              <span>{deliveryEstimate.shipping.detail}</span>
-            </div>
-          </div>
-
           {product.variants?.length > 0 && (
             <div className="pd-variants">
               <label className="pd-meta-label">Choose Variant</label>
@@ -361,9 +330,48 @@ const ProductDetail = () => {
               <button className="btn btn-accent btn-lg" onClick={handleBuyNow} disabled={availableStock === 0}>Buy Now</button>
             </div>
           )}
+          {user && user.role !== 'customer' && (
+            <div className="purchase-role-note">
+              <strong>Customer account required</strong>
+              <span>You are logged in as {user.role}. Sign in with a customer account to use Add to Cart and Buy Now.</span>
+            </div>
+          )}
           {!user && (
             <button className="btn btn-primary btn-lg" onClick={() => navigate('/login')}>Login to Purchase</button>
           )}
+
+          <div className="delivery-estimate-card">
+            <div className="delivery-estimate-header">
+              <div>
+                <strong>{deliveryEstimate.label}</strong>
+                <span>{deliveryEstimate.detail}</span>
+              </div>
+              <div className="delivery-estimate-price">
+                <small>Shipping</small>
+                <strong>{deliveryEstimate.shipping.shippingFee === 0 ? 'Free' : `Rs ${deliveryEstimate.shipping.shippingFee}`}</strong>
+              </div>
+            </div>
+            <div className="delivery-pincode-row">
+              <input
+                className="form-input"
+                value={deliveryPincodeInput}
+                onChange={(event) => setDeliveryPincodeInput(event.target.value.replace(/\D/g, '').slice(0, 6))}
+                placeholder="Enter pincode"
+                inputMode="numeric"
+              />
+              <button type="button" className="btn btn-outline" onClick={handleDeliveryCheck}>
+                Check
+              </button>
+            </div>
+            <div className={`delivery-serviceability ${serviceabilityTone}`}>
+              <strong>{deliveryEstimate.serviceability.label}</strong>
+              <span>{deliveryEstimate.serviceability.detail}</span>
+            </div>
+            <div className="delivery-threshold-note">
+              <strong>{deliveryEstimate.shipping.label}</strong>
+              <span>{deliveryEstimate.shipping.detail}</span>
+            </div>
+          </div>
         </div>
       </div>
 

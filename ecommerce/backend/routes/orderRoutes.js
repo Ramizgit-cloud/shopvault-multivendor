@@ -10,6 +10,7 @@ const {
 } = require('../controllers/orderController');
 const authMiddleware = require('../middleware/authMiddleware');
 const roleMiddleware = require('../middleware/roleMiddleware');
+const { blockDemoRouteInProduction } = require('../middleware/securityMiddleware');
 
 router.post('/', authMiddleware, roleMiddleware('customer'), createOrder);
 router.get('/my', authMiddleware, roleMiddleware('customer'), getMyOrders);
@@ -17,7 +18,7 @@ router.get('/vendor/orders', authMiddleware, roleMiddleware('vendor'), getVendor
 router.get('/vendor/earnings', authMiddleware, roleMiddleware('vendor'), getVendorEarnings);
 router.get('/vendor/payouts', authMiddleware, roleMiddleware('vendor'), getVendorPayouts);
 router.post('/vendor/payouts/request', authMiddleware, roleMiddleware('vendor'), requestVendorPayout);
-router.post('/vendor/payouts/:id/demo-mark-paid', authMiddleware, roleMiddleware('vendor'), markVendorPayoutPaidDemo);
+router.post('/vendor/payouts/:id/demo-mark-paid', blockDemoRouteInProduction, authMiddleware, roleMiddleware('vendor'), markVendorPayoutPaidDemo);
 router.get('/all', authMiddleware, roleMiddleware('admin'), getAllOrders);
 router.get('/:id/messages', authMiddleware, getOrderMessages);
 router.get('/:id', authMiddleware, getOrderById);

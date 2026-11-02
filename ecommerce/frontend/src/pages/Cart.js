@@ -16,6 +16,9 @@ const toMoney = (value) => {
 
   return Number.isFinite(parsed) ? parsed : 0;
 };
+
+const isDemoCheckoutEnabled = process.env.NODE_ENV !== 'production';
+
 const Cart = () => {
   const { cart, removeFromCart, updateQuantity, clearCart, cartTotal } = useCart();
   const { user } = useAuth();
@@ -33,6 +36,7 @@ const Cart = () => {
   const [addressLabel, setAddressLabel] = useState('');
   const [deliveryPincodeInput, setDeliveryPincodeInput] = useState('');
   const [deliveryPincode, setDeliveryPincode] = useState('');
+  const [paymentConfig, setPaymentConfig] = useState({ razorpayConfigured: true, loaded: false });
 
   const campaignDiscountAmount = campaignPricing?.discountAmount || 0;
   const couponDiscountAmount = appliedCoupon?.discountAmount || 0;
@@ -107,6 +111,30 @@ const Cart = () => {
     const savedPincode = window.localStorage.getItem('shopvault_delivery_pincode') || '';
     setDeliveryPincode(savedPincode);
     setDeliveryPincodeInput(savedPincode);
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    paymentAPI.getConfig()
+      .then((response) => {
+        if (cancelled) return;
+        const razorpayConfigured = Boolean(response.data.razorpayConfigured);
+        setPaymentConfig({ razorpayConfigured, loaded: true });
+        if (!razorpayConfigured) {
+          setCheckoutMethod(isDemoCheckoutEnabled ? 'demo' : 'cod');
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setPaymentConfig({ razorpayConfigured: false, loaded: true });
+          setCheckoutMethod(isDemoCheckoutEnabled ? 'demo' : 'cod');
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const loadRazorpay = () =>
@@ -244,6 +272,17 @@ const Cart = () => {
   const handlePlaceOrder = async () => {
     if (!address.trim()) {
       toast.error('Please enter a shipping address');
+      return;
+    }
+
+    if (checkoutMethod === 'razorpay' && !paymentConfig.razorpayConfigured) {
+      if (isDemoCheckoutEnabled) {
+        toast.info('Razorpay is not configured. Demo Payment is selected for local checkout.');
+        setCheckoutMethod('demo');
+      } else {
+        toast.error('Online payment is unavailable. Please choose another payment method.');
+        setCheckoutMethod('cod');
+      }
       return;
     }
 
@@ -572,10 +611,19 @@ const Cart = () => {
               <button
                 type="button"
                 className={`checkout-method-card ${checkoutMethod === 'razorpay' ? 'active' : ''}`}
-                onClick={() => setCheckoutMethod('razorpay')}
+                onClick={() => {
+                  if (!paymentConfig.razorpayConfigured) {
+                    toast.info(isDemoCheckoutEnabled
+                      ? 'Razorpay keys are not configured. Use Demo Payment for local checkout.'
+                      : 'Online payment is unavailable. Choose Cash on Delivery.');
+                    return;
+                  }
+                  setCheckoutMethod('razorpay');
+                }}
+                disabled={paymentConfig.loaded && !paymentConfig.razorpayConfigured}
               >
                 <div className="checkout-method-top">
-                  <span className="checkout-method-badge">Recommended</span>
+                  <span className="checkout-method-badge">{paymentConfig.razorpayConfigured ? 'Recommended' : 'Setup needed'}</span>
                   <span className="checkout-method-check">{checkoutMethod === 'razorpay' ? 'Selected' : 'Select'}</span>
                 </div>
                 <div className="checkout-method-brand-row">
@@ -585,7 +633,11 @@ const Cart = () => {
                     <small>Cards, UPI, wallets, and net banking</small>
                   </div>
                 </div>
-                <span>Pay instantly with cards, UPI, wallets, and net banking through a secure hosted checkout.</span>
+                <span>
+                  {paymentConfig.razorpayConfigured
+                    ? 'Pay instantly with cards, UPI, wallets, and net banking through a secure hosted checkout.'
+                    : 'Add real Razorpay keys in backend/.env to enable online checkout.'}
+                </span>
                 <div className="checkout-method-tags">
                   <span>UPI</span>
                   <span>Visa</span>
@@ -615,29 +667,31 @@ const Cart = () => {
                   <span>Flexible</span>
                 </div>
               </button>
-              <button
-                type="button"
-                className={`checkout-method-card ${checkoutMethod === 'demo' ? 'active' : ''}`}
-                onClick={() => setCheckoutMethod('demo')}
-              >
-                <div className="checkout-method-top">
-                  <span className="checkout-method-badge muted">Testing</span>
-                  <span className="checkout-method-check">{checkoutMethod === 'demo' ? 'Selected' : 'Select'}</span>
-                </div>
-                <div className="checkout-method-brand-row">
-                  <span className="checkout-method-icon demo">D</span>
-                  <div className="checkout-method-brand-copy">
-                    <strong>Demo Payment</strong>
-                    <small>Local development and QA flow</small>
+              {isDemoCheckoutEnabled && (
+                <button
+                  type="button"
+                  className={`checkout-method-card ${checkoutMethod === 'demo' ? 'active' : ''}`}
+                  onClick={() => setCheckoutMethod('demo')}
+                >
+                  <div className="checkout-method-top">
+                    <span className="checkout-method-badge muted">Testing</span>
+                    <span className="checkout-method-check">{checkoutMethod === 'demo' ? 'Selected' : 'Select'}</span>
                   </div>
-                </div>
-                <span>Use the local testing flow to confirm checkout without opening the Razorpay modal.</span>
-                <div className="checkout-method-tags">
-                  <span>Local</span>
-                  <span>Instant</span>
-                  <span>Testing</span>
-                </div>
-              </button>
+                  <div className="checkout-method-brand-row">
+                    <span className="checkout-method-icon demo">D</span>
+                    <div className="checkout-method-brand-copy">
+                      <strong>Demo Payment</strong>
+                      <small>Local development and QA flow</small>
+                    </div>
+                  </div>
+                  <span>Use the local testing flow to confirm checkout without opening the Razorpay modal.</span>
+                  <div className="checkout-method-tags">
+                    <span>Local</span>
+                    <span>Instant</span>
+                    <span>Testing</span>
+                  </div>
+                </button>
+              )}
             </div>
           </div>
 

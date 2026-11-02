@@ -12,15 +12,16 @@ const {
   changePassword,
 } = require('../controllers/authController');
 const authMiddleware = require('../middleware/authMiddleware');
+const { authLimiter, passwordResetLimiter } = require('../middleware/rateLimitMiddleware');
 
-router.post('/register', register);
-router.post('/login', login);
+router.post('/register', authLimiter, register);
+router.post('/login', authLimiter, login);
 router.post('/verify-email', verifyEmail);
-router.post('/resend-verification', resendVerificationEmail);
-router.post('/forgot-password', forgotPassword);
-router.post('/reset-password', resetPassword);
+router.post('/resend-verification', passwordResetLimiter, resendVerificationEmail);
+router.post('/forgot-password', passwordResetLimiter, forgotPassword);
+router.post('/reset-password', passwordResetLimiter, resetPassword);
 router.get('/me', authMiddleware, getMe);
 router.put('/profile', authMiddleware, updateProfile);
-router.put('/change-password', authMiddleware, changePassword);
+router.put('/change-password', authMiddleware, passwordResetLimiter, changePassword);
 
 module.exports = router;

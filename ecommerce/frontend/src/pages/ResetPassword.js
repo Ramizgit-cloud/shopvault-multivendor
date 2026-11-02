@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { authAPI } from '../services/api';
 import { toast } from 'react-toastify';
+import { validatePassword } from '../utils/passwordPolicy';
 import './Auth.css';
 
 const ResetPassword = () => {
@@ -21,8 +22,9 @@ const ResetPassword = () => {
       return;
     }
 
-    if (form.password.length < 6) {
-      toast.error('Password must be at least 6 characters');
+    const passwordPolicy = validatePassword(form.password);
+    if (!passwordPolicy.valid) {
+      toast.error(passwordPolicy.message);
       return;
     }
 
@@ -55,7 +57,7 @@ const ResetPassword = () => {
         <form onSubmit={handleSubmit} className="auth-form">
           <div className="form-group">
             <label className="form-label">New password</label>
-            <input className="form-input" type="password" name="password" value={form.password} onChange={handleChange} placeholder="Min. 6 characters" required />
+            <input className="form-input" type="password" name="password" value={form.password} onChange={handleChange} placeholder="Min. 10 chars, number, symbol" required />
           </div>
           <div className="form-group">
             <label className="form-label">Confirm password</label>

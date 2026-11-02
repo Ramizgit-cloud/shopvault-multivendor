@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
 require('dotenv').config();
 
 const authRoutes = require('./routes/authRoutes');
@@ -15,6 +16,7 @@ const campaignRoutes = require('./routes/campaignRoutes');
 const supportRoutes = require('./routes/supportRoutes');
 const vendorRoutes = require('./routes/vendorRoutes');
 const errorHandler = require('./middleware/errorHandler');
+const { securityHeaders } = require('./middleware/securityMiddleware');
 
 const app = express();
 
@@ -27,17 +29,29 @@ const configuredOrigins = [
   .map((origin) => origin.trim())
   .filter(Boolean);
 
-const allowedOrigins = Array.from(new Set([
-  ...configuredOrigins,
+const developmentOrigins = process.env.NODE_ENV === 'production' ? [] : [
   'http://localhost:3000',
   'http://localhost:3001',
   'http://localhost:3002',
+  'http://localhost:5001',
   'http://127.0.0.1:3000',
   'http://127.0.0.1:3001',
   'http://127.0.0.1:3002',
+  'http://127.0.0.1:5001',
+];
+
+const allowedOrigins = Array.from(new Set([
+  ...configuredOrigins,
+  ...developmentOrigins,
 ]));
 
+const isLocalDevelopmentOrigin = (origin) => (
+  process.env.NODE_ENV !== 'production' &&
+  /^https?:\/\/(localhost|127\.0\.0\.1):\d+$/.test(origin)
+);
+
 // Middleware
+app.use(securityHeaders);
 app.use(cors({
   origin(origin, callback) {
     // Allow server-to-server tools and same-origin requests without an Origin header.
@@ -46,7 +60,13 @@ app.use(cors({
       return;
     }
 
-    if (allowedOrigins.includes(origin)) {
+    // Helpful for local testing when someone opens frontend/build/index.html directly.
+    if (origin === 'null' && process.env.NODE_ENV !== 'production') {
+      callback(null, origin);
+      return;
+    }
+
+    if (allowedOrigins.includes(origin) || isLocalDevelopmentOrigin(origin)) {
       callback(null, origin);
       return;
     }
@@ -82,6 +102,20 @@ app.use('/api/vendors', vendorRoutes);
 
 // Health check
 app.get('/api/health', (_req, res) => res.json({ status: 'OK', timestamp: new Date().toISOString() }));
+
+const frontendBuildPath = path.join(__dirname, '..', 'frontend', 'build');
+if (fs.existsSync(frontendBuildPath)) {
+  app.use(express.static(frontendBuildPath));
+
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api/')) {
+      next();
+      return;
+    }
+
+    res.sendFile(path.join(frontendBuildPath, 'index.html'));
+  });
+}
 
 // 404
 app.use((_req, res) => res.status(404).json({ success: false, message: 'Route not found' }));

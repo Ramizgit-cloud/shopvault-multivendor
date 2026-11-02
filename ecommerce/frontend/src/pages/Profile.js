@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { authAPI } from '../services/api';
 import { toast } from 'react-toastify';
 import { createAddressEntry, getAddressBook, MAX_SAVED_ADDRESSES, saveAddressBook } from '../utils/addressBook';
+import { validatePassword } from '../utils/passwordPolicy';
 import ProfilePurchaseHistory from '../components/ProfilePurchaseHistory';
 import './Profile.css';
 
@@ -47,6 +48,8 @@ const Profile = () => {
   const handlePasswordChange = async (e) => {
     e.preventDefault();
     if (pwForm.newPassword !== pwForm.confirm) { toast.error('Passwords do not match'); return; }
+    const passwordPolicy = validatePassword(pwForm.newPassword);
+    if (!passwordPolicy.valid) { toast.error(passwordPolicy.message); return; }
     setChangingPw(true);
     try {
       await authAPI.changePassword({ currentPassword: pwForm.currentPassword, newPassword: pwForm.newPassword });

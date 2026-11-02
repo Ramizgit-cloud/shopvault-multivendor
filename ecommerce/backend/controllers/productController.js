@@ -171,6 +171,17 @@ const sortProducts = (products, sort) => {
   return [...products].sort(sorters[sort] || sorters.latest);
 };
 
+const normalizeOptionalString = (value) => {
+  if (value === undefined || value === null) return null;
+  const normalized = String(value).trim();
+  return normalized || null;
+};
+
+const normalizeStockValue = (value) => {
+  if (value === undefined || value === null || value === '') return 0;
+  return value;
+};
+
 // GET /api/products - Public
 const getAllProducts = async (req, res, next) => {
   try {
@@ -419,22 +430,31 @@ const createProduct = async (req, res, next) => {
     }
 
     const resolvedImage = await resolveProductImage(image, req);
-    const supportsVariants = await hasTableColumn('products', 'variants');
+    const productAttributes = await getProductAttributes();
+    const supportsBrand = productAttributes.includes('brand');
+    const supportsTemporaryAvailability = productAttributes.includes('isTemporarilyUnavailable');
+    const supportsVariants = productAttributes.includes('variants');
 
     const normalizedVariants = normalizeVariants(variants);
-    const resolvedStock = normalizedVariants.length > 0 ? getVariantStockTotal(normalizedVariants) : stock;
+    const resolvedStock = normalizedVariants.length > 0 ? getVariantStockTotal(normalizedVariants) : normalizeStockValue(stock);
     const productPayload = {
       name,
-      description,
+      description: normalizeOptionalString(description),
       price,
       stock: resolvedStock,
-      category,
-      brand: brand || null,
+      category: normalizeOptionalString(category),
       image: resolvedImage,
-      discount,
+      discount: discount === undefined || discount === '' ? 0 : discount,
       vendor_id: req.user.id,
-      isTemporarilyUnavailable: false,
     };
+
+    if (supportsBrand) {
+      productPayload.brand = normalizeOptionalString(brand);
+    }
+
+    if (supportsTemporaryAvailability) {
+      productPayload.isTemporarilyUnavailable = false;
+    }
 
     if (supportsVariants) {
       productPayload.variants = normalizedVariants.length > 0 ? serializeVariants(normalizedVariants) : null;
@@ -473,23 +493,32 @@ const updateProduct = async (req, res, next) => {
 
     const { name, description, price, stock, category, brand, image, discount, isActive, isTemporarilyUnavailable, variants } = req.body;
     const resolvedImage = await resolveProductImage(image, req, product.image);
-    const supportsVariants = await hasTableColumn('products', 'variants');
+    const productAttributes = await getProductAttributes();
+    const supportsBrand = productAttributes.includes('brand');
+    const supportsTemporaryAvailability = productAttributes.includes('isTemporarilyUnavailable');
+    const supportsVariants = productAttributes.includes('variants');
     const previousVariants = supportsVariants ? parseVariants(product.variants) : [];
     const previousStock = Number(product.stock || 0);
     const normalizedVariants = normalizeVariants(variants);
-    const resolvedStock = normalizedVariants.length > 0 ? getVariantStockTotal(normalizedVariants) : stock;
+    const resolvedStock = normalizedVariants.length > 0 ? getVariantStockTotal(normalizedVariants) : normalizeStockValue(stock);
     const productPayload = {
       name,
-      description,
+      description: normalizeOptionalString(description),
       price,
       stock: resolvedStock,
-      category,
-      brand: brand || null,
+      category: normalizeOptionalString(category),
       image: resolvedImage,
-      discount,
+      discount: discount === undefined || discount === '' ? 0 : discount,
       isActive,
-      isTemporarilyUnavailable,
     };
+
+    if (supportsBrand) {
+      productPayload.brand = normalizeOptionalString(brand);
+    }
+
+    if (supportsTemporaryAvailability) {
+      productPayload.isTemporarilyUnavailable = isTemporarilyUnavailable;
+    }
 
     if (supportsVariants) {
       productPayload.variants = normalizedVariants.length > 0 ? serializeVariants(normalizedVariants) : null;
