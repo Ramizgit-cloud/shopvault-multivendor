@@ -34,3 +34,9 @@ Thumbs.db
 # Runtime/cache folders
 .cache/
 .parcel-cache/
+
+# Backend runtime data
+/ecommerce/backend/data/order-messages.json
+/ecommerce/backend/data/restock-history.json
+/ecommerce/backend/data/support-ticket-messages.json
+/ecommerce/backend/data/support-tickets.json
